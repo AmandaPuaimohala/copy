@@ -152,11 +152,11 @@ function setNightVision(on) {
 // -------------------- Wolf Heart Release Button --------------------
 let wolfReleaseBtn = null;
 
-export function createWolfReleaseButton(onRelease, delay = 3000) {
+export function createWolfReleaseButton(onRelease, delay = 4000) {
   if (wolfReleaseBtn) return;
 
   wolfReleaseBtn = document.createElement('button');
-  wolfReleaseBtn.textContent = '🖤 Release the Heart 🖤';
+  wolfReleaseBtn.textContent = '🖤 Close Heart 🖤';
 
   wolfReleaseBtn.style.cssText = `
     position: absolute;
