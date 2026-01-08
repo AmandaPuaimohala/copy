@@ -45,7 +45,7 @@ controls.maxDistance = 20;
 const enterScreen = document.createElement('div');
 enterScreen.id = 'enterScreen';
 enterScreen.innerHTML = `
-  <h1>Welcome to Jordan's Reading Room</h1>
+  <h1>Jordan's Page</h1>
   <p>Preparing the room...</p>
   <button id="enterButton">Enter</button>
 `;
