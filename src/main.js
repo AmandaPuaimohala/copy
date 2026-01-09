@@ -46,7 +46,7 @@ const enterScreen = document.createElement('div');
 enterScreen.id = 'enterScreen';
 enterScreen.innerHTML = `
   <h1>Jordan's Page</h1>
-  <p>Preparing the room...</p>
+  <p>...</p>
   <button id="enterButton">Enter</button>
 `;
 document.body.appendChild(enterScreen);
@@ -73,7 +73,6 @@ const popupInfo = {
   book6: "Flappy",
   book53: "Book 53: the hidden gem.",
   globe: "A tiny globe of the world!",
-  mug: "A cute mug for your coffee.",
   daisy: "❤️",
   Chihuahua: "psychic"
 };
@@ -309,6 +308,64 @@ export function createFlappyCloseButton(stopFlappyCallback) {
 
   document.body.appendChild(flappyCloseBtn);
 }
+let daisyCloseBtn = null;
+
+export function createDaisyCloseButton(stopDaisyCallback, delay = 1000) {
+  if (daisyCloseBtn) return;
+
+  daisyCloseBtn = document.createElement('button');
+  daisyCloseBtn.textContent = '🌈 Close Rainbow 🌈';
+
+  daisyCloseBtn.style.cssText = `
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    padding: 14px 32px;
+    font-size: 1.05rem;
+    letter-spacing: 0.12em;
+    border-radius: 999px;
+    border: 1px solid rgba(214,195,163,0.4);
+    background: radial-gradient(circle at top, rgba(255,120,200,0.9), rgba(120,0,255,0.9));
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 18px rgba(255,150,255,0.5), 0 0 35px rgba(60,0,120,0.6) inset;
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease, transform 1.2s ease, box-shadow 0.3s ease;
+    z-index: 1000;
+  `;
+
+  daisyCloseBtn.onmouseenter = () => {
+    daisyCloseBtn.style.transform = 'translateX(-50%) translateY(6px) scale(1.05)';
+    daisyCloseBtn.style.boxShadow = '0 0 30px rgba(255,200,255,0.8), 0 0 45px rgba(100,0,200,0.8) inset';
+  };
+
+  daisyCloseBtn.onmouseleave = () => {
+    daisyCloseBtn.style.transform = 'translateX(-50%) translateY(6px) scale(1)';
+    daisyCloseBtn.style.boxShadow = '0 0 18px rgba(255,150,255,0.5), 0 0 35px rgba(60,0,120,0.6) inset';
+  };
+
+  daisyCloseBtn.onclick = () => {
+    if (stopDaisyCallback) stopDaisyCallback();
+    daisyCloseBtn.style.opacity = '0';
+    daisyCloseBtn.style.pointerEvents = 'none';
+    setTimeout(() => {
+      daisyCloseBtn.remove();
+      daisyCloseBtn = null;
+    }, 800);
+  };
+
+  document.body.appendChild(daisyCloseBtn);
+
+  setTimeout(() => {
+    daisyCloseBtn.style.opacity = '1';
+    daisyCloseBtn.style.pointerEvents = 'auto';
+    daisyCloseBtn.style.transform = 'translateX(-50%) translateY(0px)';
+  }, delay);
+}
+
 
 
 /* -------------------- Loaders & Preloading -------------------- */
@@ -447,10 +504,13 @@ function startTick() {
         break;
 
       case 'daisy':
-        popupText.textContent = popupInfo[hovered.name];
-        popup.style.display = 'block';
-        stopDaisy = daisyEvent();
+        popup.style.display = 'none';
+        stopDaisy = daisyEvent(scene);
+        createDaisyCloseButton(() => {
+          stopAllEvents();
+        })
         break;
+
 
       case 'Chihuahua':
         popupText.textContent = popupInfo[hovered.name];
@@ -496,7 +556,7 @@ function startTick() {
 
         const floatObjs = [];
         preloadedScene.traverse(obj => {
-          const floatNames = ['milk', 'mug', 'Chihuahua', 'globe', 'cat', 'mountainDew', 'book4', 'book6'];
+          const floatNames = ['milk', 'mug', 'Chihuahua', 'globe', 'cat', 'mountainDew', 'book4', 'book6', 'book1', 'book2','book3'];
           if (floatNames.includes(obj.name)) floatObjs.push(obj);
         });
         const ghost = startGhostEvent(scene, floatObjs);
