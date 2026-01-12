@@ -16,7 +16,7 @@ import { startWolfSpirits } from './wolf.js';
 const canvas = document.querySelector('#experience-canvas');
 const sizes = { width: window.innerWidth, height: window.innerHeight };
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffcaa8);
+scene.background = new THREE.Color(0x87ceeb);
 
 /* -------------------- Camera -------------------- */
 const camera = new THREE.PerspectiveCamera(70, sizes.width / sizes.height, 0.1, 100);
@@ -52,6 +52,7 @@ enterScreen.innerHTML = `
 document.body.appendChild(enterScreen);
 
 const enterButton = document.getElementById('enterButton');
+
 ``
 /* -------------------- Interaction -------------------- */
 const raycaster = new THREE.Raycaster();
@@ -314,7 +315,7 @@ export function createDaisyCloseButton(stopDaisyCallback, delay = 1000) {
   if (daisyCloseBtn) return;
 
   daisyCloseBtn = document.createElement('button');
-  daisyCloseBtn.textContent = '🌈 Close Rainbow 🌈';
+  daisyCloseBtn.textContent = '🌈 Close 🌈';
 
   daisyCloseBtn.style.cssText = `
     position: absolute;
@@ -407,7 +408,8 @@ const bakedTextureMap = {
   pot:'images/daisyPot.jpg', 
   dinky:'images/dinks.jpg', 
   pillow:'images/pillow.jpg',
-  frame: 'images/frame.jpg'
+  frame: 'images/frame.jpg',
+  wolf: 'images/wolf.jpg'
 };
 
 const bakedTextures = {};
@@ -441,9 +443,23 @@ let stopSheep=null, stopDaisy=null, stopGlobe=null, stopEightBall=null, stopFlap
 let isEventActive = false;
 
 
-const normalBg = new THREE.Color(0xffcaa8);
+const normalBg = new THREE.Color(0xc0e0f0);
 const sheepBg = new THREE.Color(0x0b1e3f);
+const tieDyeColors = [
+  new THREE.Color().setHSL(0.95, 0.8, 0.7),  // pink
+  new THREE.Color().setHSL(0.08, 0.8, 0.65), // orange
+  new THREE.Color().setHSL(0.55, 0.85, 0.7), // light blue
+  new THREE.Color().setHSL(0.75, 0.8, 0.65)  // purple
+];
+let skyMode = 'normal'; // normal | daisy
+let skyTime = 0;
+
 const flappy = createFlappyBook(scene, camera);
+const bgMusic = new Audio('sounds/heart.ogg');
+bgMusic.loop = true;
+bgMusic.volume = 0.;
+bgMusic.play().catch(() => console.log("Autoplay prevented."));
+
 
 
 scene.background = normalBg;
@@ -479,6 +495,10 @@ enterButton.addEventListener('click', () => {
     enterScreen.style.display = 'none';
     scene.add(preloadedScene);
     startTick();
+
+    // Play background music now, after the user clicks enter
+    bgMusic.play().catch(() => console.log("Music playback blocked."));
+
     enterScreen.removeEventListener('animationend', handler);
   });
 });
@@ -505,11 +525,25 @@ function startTick() {
 
       case 'daisy':
         popup.style.display = 'none';
+
+        if (!bgMusic.paused) bgMusic.pause();
+
+        skyMode = 'daisy';
+        skyTime = 0;
+
         stopDaisy = daisyEvent(scene);
+
         createDaisyCloseButton(() => {
+          skyMode = 'normal';
+
+          if (bgMusic.paused)
+            bgMusic.play().catch(() => console.log("Music blocked."));
+
           stopAllEvents();
-        })
+        });
         break;
+
+
 
 
       case 'Chihuahua':
@@ -602,6 +636,23 @@ function startTick() {
       mesh.position.y = THREE.MathUtils.lerp(mesh.position.y, data.basePos.y + (isHover ? 0.3 : 0), 0.1);
       mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, data.baseRot.y + (isHover ? 0 : 0), 0.1);
     });
+
+      // -------------------- Inside your tick() --------------------
+      if (skyMode === 'daisy') {
+        skyTime += 0.0005; // slower progression
+
+        const t = (Math.sin(skyTime) + 1) / 2; // oscillates 0 → 1 → 0
+        const colorCount = tieDyeColors.length;
+        const index = Math.floor(t * (colorCount - 1));
+        const nextIndex = (index + 1) % colorCount;
+        const mixT = (t * (colorCount - 1)) % 1;
+
+        scene.background = tieDyeColors[index].clone().lerp(tieDyeColors[nextIndex], mixT);
+      } else {
+        scene.background.lerp(normalBg, 0.05);
+      }
+
+
 
     // -------------------- Camera Clamp --------------------
     const MIN_Y = 1;   
