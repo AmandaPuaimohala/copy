@@ -457,7 +457,7 @@ let skyTime = 0;
 const flappy = createFlappyBook(scene, camera);
 const bgMusic = new Audio('sounds/heart.ogg');
 bgMusic.loop = true;
-bgMusic.volume = 0.;
+bgMusic.volume = 0.05;
 bgMusic.play().catch(() => console.log("Autoplay prevented."));
 
 
