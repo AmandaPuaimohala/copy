@@ -69,7 +69,9 @@ const popupInfo = {
   book1: "This is book 1, full of adventures!",
   book2: "Book 2: mystery awaits.",
   book3: "Go to couch.",
-  book4: "Book 4: fun stories inside.",
+  book4: `
+  <img src="gifs/fallout-3-happy-birthday.gif" style="width:100%; max-width:400px;">
+  <img src="gifs/is-that-so-the-ghoul.gif" style="width:100%; max-width:400px;">`,
   book5: "Book 5: secrets revealed.",
   book6: "Flappy",
   book53: "Book 53: the hidden gem.",
@@ -446,10 +448,10 @@ let isEventActive = false;
 const normalBg = new THREE.Color(0xc0e0f0);
 const sheepBg = new THREE.Color(0x0b1e3f);
 const tieDyeColors = [
-  new THREE.Color().setHSL(0.95, 0.8, 0.7),  // pink
-  new THREE.Color().setHSL(0.08, 0.8, 0.65), // orange
-  new THREE.Color().setHSL(0.55, 0.85, 0.7), // light blue
-  new THREE.Color().setHSL(0.75, 0.8, 0.65)  // purple
+  new THREE.Color().setHSL(0.95, 0.8, 0.7),  
+  new THREE.Color().setHSL(0.08, 0.8, 0.65), 
+  new THREE.Color().setHSL(0.55, 0.85, 0.7), 
+  new THREE.Color().setHSL(0.75, 0.8, 0.65)  
 ];
 let skyMode = 'normal'; // normal | daisy
 let skyTime = 0;
@@ -523,6 +525,12 @@ function startTick() {
         stopSheep = spamSheep();
         break;
 
+      case 'book4':
+        popupText.innerHTML = popupInfo[hovered.name];
+        popup.style.display = 'block';
+        break;
+
+
       case 'daisy':
         popup.style.display = 'none';
 
@@ -542,9 +550,6 @@ function startTick() {
           stopAllEvents();
         });
         break;
-
-
-
 
       case 'Chihuahua':
         popupText.textContent = popupInfo[hovered.name];
