@@ -520,7 +520,8 @@ const flappy = createFlappyBook(scene, camera);
 
 // -------------------- Playlist --------------------
 const playlistIframe = document.createElement('iframe');
-playlistIframe.src = 'https://www.youtube.com/embed/videoseries?list=PLeRzOrAgDarvWWFillWtLVXFykNtVQAn_&enablejsapi=1&autoplay=0';
+playlistIframe.src =
+  'https://www.youtube.com/embed/videoseries?list=PLeRzOrAgDarvWWFillWtLVXFykNtVQAn_&enablejsapi=1&autoplay=0';
 playlistIframe.style.cssText = `
   width: 320px;
   height: 180px;
@@ -532,6 +533,23 @@ playlistIframe.allow = 'autoplay; encrypted-media';
 document.body.appendChild(playlistIframe);
 
 let musicPanel = null;
+
+function postCmd(cmd, args = '') {
+  setTimeout(() => {
+    playlistIframe.contentWindow?.postMessage(
+      JSON.stringify({
+        event: 'command',
+        func: cmd,
+        args
+      }),
+      '*'
+    );
+  }, 100);
+}
+
+function setVolume(level) {
+  postCmd('setVolume', [level]); 
+}
 
 function createMusicPanel() {
   if (musicPanel) return;
@@ -549,18 +567,15 @@ function createMusicPanel() {
     z-index: 1000;
   `;
 
-  // Heading
   const heading = document.createElement('div');
   heading.textContent = 'Our Playlist 🎶';
   heading.style.cssText = `
     font-size: 1.2rem;
     font-weight: bold;
     color: #fff;
-    text-align: center;
   `;
   musicPanel.appendChild(heading);
 
-  // Add buttons
   const btnNames = ['Play', 'Pause', 'Stop', 'Prev', 'Next'];
   const buttons = {};
 
@@ -569,7 +584,6 @@ function createMusicPanel() {
     btn.textContent = name;
     btn.style.cssText = `
       padding: 10px 20px;
-      font-size: 1rem;
       border-radius: 8px;
       border: none;
       background: #3b5a7d;
@@ -580,28 +594,38 @@ function createMusicPanel() {
     buttons[name] = btn;
   });
 
+  // Volume slider
+  const volume = document.createElement('input');
+  volume.type = 'range';
+  volume.min = 0;
+  volume.max = 100;
+  volume.value = 5;
+  volume.style.width = '120px';
+  musicPanel.appendChild(volume);
+
+  volume.addEventListener('input', e => {
+    setVolume(e.target.value);
+  });
+
   document.body.appendChild(musicPanel);
 
-  // Button functions
-  function postCmd(cmd) {
-    setTimeout(() => {
-      playlistIframe.contentWindow?.postMessage(`{"event":"command","func":"${cmd}","args":""}`, '*');
-    }, 100);
-  }
-
-  buttons.Play.addEventListener('click', () => {
+  // Button actions
+  buttons.Play.onclick = () => {
     playlistIframe.style.display = 'block';
     postCmd('playVideo');
-  });
-  buttons.Pause.addEventListener('click', () => postCmd('pauseVideo'));
-  buttons.Stop.addEventListener('click', () => {
+    setTimeout(() => setVolume(volume.value), 300); 
+  };
+
+  buttons.Pause.onclick = () => postCmd('pauseVideo');
+
+  buttons.Stop.onclick = () => {
     postCmd('stopVideo');
     playlistIframe.style.display = 'none';
-  });
-  buttons.Prev.addEventListener('click', () => postCmd('previousVideo'));
-  buttons.Next.addEventListener('click', () => postCmd('nextVideo'));
-}
+  };
 
+  buttons.Prev.onclick = () => postCmd('previousVideo');
+  buttons.Next.onclick = () => postCmd('nextVideo');
+}
 
 
 function stopAllEvents(){
